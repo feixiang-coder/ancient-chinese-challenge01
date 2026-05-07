@@ -1,0 +1,111 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no" />
+    <title>古文匠人 · 学习闯关</title>
+    <link rel="stylesheet" href="css/style.css" />
+</head>
+<body class="page-detail">
+    <header class="detail-header">
+        <a class="back-link" href="index.html">‹ 返回目录</a>
+        <h1 id="gameTitle">加载中...</h1>
+        <div class="step-indicator" id="stepIndicator">
+            <span class="step-dot active" data-step="1">1</span>
+            <span class="step-dot" data-step="2">2</span>
+            <span class="step-dot" data-step="3">3</span>
+            <span class="step-dot" data-step="4">4</span>
+        </div>
+    </header>
+
+    <main class="detail-main">
+        <!-- 展示1：基本信息 -->
+        <section class="stage stage-info active" data-step="1">
+            <div class="stage-card">
+                <div class="stage-tag">展示 1 · 游戏基本信息</div>
+                <h2 id="infoName">—</h2>
+                <ul class="info-list">
+                    <li><span class="label">适配对象</span><span class="value" id="infoAudience">—</span></li>
+                    <li><span class="label">核心课文</span><span class="value" id="infoText">—</span></li>
+                    <li><span class="label">时空定位</span><span class="value" id="infoTime">—</span></li>
+                    <li><span class="label">玩法</span><span class="value" id="infoPlay">—</span></li>
+                </ul>
+                <div class="stage-actions">
+                    <span class="auto-tip">10 秒后自动进入下一步</span>
+                    <button class="btn btn-primary" data-go-step="2">立即进入游戏序</button>
+                </div>
+            </div>
+        </section>
+
+        <!-- 展示2：游戏序 -->
+        <section class="stage stage-intro" data-step="2">
+            <div class="stage-card">
+                <div class="stage-tag">展示 2 · 游戏序</div>
+                <p class="intro-text" id="introText">—</p>
+                <div class="stage-actions">
+                    <span class="auto-tip">10 秒后自动进入闯关</span>
+                    <button class="btn btn-primary" data-go-step="3">开始闯关</button>
+                </div>
+            </div>
+        </section>
+
+        <!-- 展示3：视频节点闯关 -->
+        <section class="stage stage-video" data-step="3">
+            <div class="stage-card stage-card-wide">
+                <div class="stage-tag">展示 3 · 视频闯关</div>
+                <div class="video-wrap">
+                    <video id="gameVideo" controls preload="metadata" playsinline></video>
+                    <div class="video-cover hidden" id="videoCover">
+                        <p>请点击开始播放视频，遇到节点会自动暂停弹题</p>
+                        <button class="btn btn-primary" id="btnPlay">开始播放</button>
+                    </div>
+                </div>
+                <div class="checkpoints" id="checkpoints"></div>
+                <div class="stage-actions">
+                    <button class="btn btn-ghost" id="btnRestartVideo">重新播放</button>
+                    <button class="btn btn-primary" data-go-step="4" id="btnFinishVideo">查看总结</button>
+                </div>
+            </div>
+        </section>
+
+        <!-- 展示4：总结 -->
+        <section class="stage stage-summary" data-step="4">
+            <div class="stage-card">
+                <div class="stage-tag">展示 4 · 总结</div>
+                <div class="summary-reward hidden" id="summaryReward"></div>
+                <p class="summary-text" id="summaryText">—</p>
+                <div class="stage-actions">
+                    <a class="btn btn-ghost" href="index.html">返回目录</a>
+                    <button class="btn btn-primary" data-go-step="3">回看视频</button>
+                </div>
+            </div>
+        </section>
+    </main>
+
+    <!-- 答题弹窗 -->
+    <div class="modal-mask hidden" id="quizModal">
+        <div class="modal">
+            <div class="modal-head">
+                <h3 id="quizTitle">关卡题目</h3>
+                <span class="modal-sub" id="quizSubtitle"></span>
+            </div>
+            <div class="modal-body">
+                <div class="quiz-task" id="quizTask"></div>
+                <div class="quiz-question" id="quizQuestion"></div>
+                <div class="quiz-options" id="quizOptions"></div>
+                <div class="quiz-feedback hidden" id="quizFeedback"></div>
+            </div>
+            <div class="modal-foot">
+                <button class="btn btn-primary" id="btnSubmitAnswer">提交答案</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- 通用提示弹窗 -->
+    <div class="toast hidden" id="toast"></div>
+
+    <script src="libs/xlsx.full.min.js"></script>
+    <script src="js/excel-loader.js"></script>
+    <script src="js/detail.js"></script>
+</body>
+</html>

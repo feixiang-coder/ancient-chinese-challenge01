@@ -1,0 +1,12 @@
+# 编辑器
+.vscode/
+.idea/
+
+# 日志/缓存
+*.log
+node_modules/
+.DS_Store
+Thumbs.db
+
+# Excel 临时锁文件
+~$*.xlsx

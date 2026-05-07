@@ -1,0 +1,43 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no" />
+    <title>古文匠人 · 学习闯关目录</title>
+    <link rel="stylesheet" href="css/style.css" />
+</head>
+<body class="page-index">
+    <header class="site-header">
+        <div class="brand">
+            <span class="brand-mark">古</span>
+            <div class="brand-text">
+                <h1>古文匠人</h1>
+                <p>古文学习闯关 · 目录</p>
+            </div>
+        </div>
+        <div class="header-tip" id="loadStatus">正在加载古文目录...</div>
+    </header>
+
+    <main class="catalog-wrap">
+        <section class="catalog-intro">
+            <h2>选择一篇古文，开启你的穿越闯关之旅</h2>
+            <p>每一篇古文都是一段时空旅程，点击卡片进入学习闯关。</p>
+        </section>
+
+        <section class="catalog-grid" id="catalogGrid"></section>
+
+        <section class="catalog-empty hidden" id="catalogEmpty">
+            <h3>暂未加载到古文目录</h3>
+            <p>请确认 <code>data/articles.xlsx</code> 是否存在，并通过本地服务或 Gitee Pages 访问网页。</p>
+        </section>
+    </main>
+
+    <footer class="site-footer">
+        <p>© 古文匠人 · 纯静态网页学习小游戏</p>
+    </footer>
+
+    <script src="libs/xlsx.full.min.js"></script>
+    <script src="js/excel-loader.js"></script>
+    <script src="js/index.js"></script>
+</body>
+</html>
