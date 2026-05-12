@@ -1,0 +1,606 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+    <title>班级诗歌朗读评价系统 | 28人动态追踪 + 图表完全修复</title>
+    <!-- ECharts 核心库 -->
+    <script src="https://cdn.jsdelivr.net/npm/echarts@5.5.0/dist/echarts.min.js"></script>
+    <!-- Font Awesome 6 -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+    <style>
+        * {
+            box-sizing: border-box;
+            font-family: system-ui, 'Segoe UI', 'Roboto', 'Noto Sans', sans-serif;
+        }
+        body {
+            background: #eef2f5;
+            margin: 0;
+            padding: 20px;
+        }
+        .app-container {
+            max-width: 1600px;
+            margin: 0 auto;
+        }
+        .header {
+            background: white;
+            border-radius: 32px;
+            padding: 18px 24px;
+            margin-bottom: 24px;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.03);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-wrap: wrap;
+        }
+        .title-area h1 {
+            margin: 0;
+            font-size: 1.7rem;
+            color: #1e293b;
+        }
+        .title-area p {
+            margin: 4px 0 0;
+            color: #4b5563;
+            font-size: 0.85rem;
+        }
+        .student-nav {
+            background: #f1f5f9;
+            border-radius: 48px;
+            padding: 6px 12px;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            flex-wrap: wrap;
+        }
+        .student-selector {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            background: white;
+            padding: 4px 12px;
+            border-radius: 40px;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.05);
+        }
+        .student-selector label {
+            font-weight: 600;
+            color: #0f3b5e;
+        }
+        #studentIndex {
+            width: 70px;
+            text-align: center;
+            font-weight: bold;
+            border: none;
+            background: #eef2ff;
+            padding: 6px;
+            border-radius: 24px;
+        }
+        .nav-btn {
+            background: white;
+            border: none;
+            font-size: 1rem;
+            padding: 6px 14px;
+            border-radius: 32px;
+            cursor: pointer;
+            font-weight: 500;
+            transition: 0.2s;
+        }
+        .nav-btn:hover {
+            background: #d9e2ef;
+        }
+        .badge {
+            background: #2563eb;
+            color: white;
+            border-radius: 40px;
+            padding: 4px 16px;
+            font-size: 0.8rem;
+        }
+        .split-layout {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 24px;
+        }
+        .personal-panel {
+            flex: 1.4;
+            min-width: 380px;
+            background: white;
+            border-radius: 28px;
+            box-shadow: 0 10px 20px rgba(0,0,0,0.05);
+            padding: 20px;
+        }
+        .class-panel {
+            flex: 1;
+            min-width: 380px;
+            background: white;
+            border-radius: 28px;
+            box-shadow: 0 10px 20px rgba(0,0,0,0.05);
+            padding: 20px;
+        }
+        .score-table {
+            width: 100%;
+            border-collapse: collapse;
+            font-size: 0.85rem;
+        }
+        .score-table th, .score-table td {
+            padding: 8px 6px;
+            border-bottom: 1px solid #e2e8f0;
+        }
+        .category-header th {
+            background: #eef2ff;
+            font-weight: 700;
+            color: #1e3a8a;
+        }
+        .indent {
+            padding-left: 20px !important;
+            color: #2c3e66;
+        }
+        .score-input {
+            width: 75px;
+            padding: 5px 8px;
+            border-radius: 24px;
+            border: 1px solid #cbd5e1;
+            text-align: center;
+            font-weight: 500;
+        }
+        .score-input:focus {
+            border-color: #3b82f6;
+            outline: none;
+            box-shadow: 0 0 0 2px #bfdbfe;
+        }
+        .total-card {
+            background: linear-gradient(135deg, #0f172a, #1e293b);
+            border-radius: 24px;
+            padding: 12px 20px;
+            margin: 18px 0 12px 0;
+            display: flex;
+            justify-content: space-between;
+            color: white;
+            align-items: baseline;
+        }
+        .total-card .total-val {
+            font-size: 2rem;
+            font-weight: 800;
+            background: rgba(255,255,255,0.15);
+            padding: 0 16px;
+            border-radius: 50px;
+        }
+        .chart-title {
+            font-size: 1rem;
+            font-weight: 600;
+            margin: 16px 0 8px 0;
+            border-left: 4px solid #3b82f6;
+            padding-left: 10px;
+        }
+        .radar-box {
+            height: 280px;
+            width: 100%;
+        }
+        .bar-box {
+            height: 260px;
+            width: 100%;
+        }
+        .class-bar-box {
+            height: 320px;
+            width: 100%;
+            margin-top: 10px;
+        }
+        .legend-note {
+            font-size: 0.7rem;
+            color: #5e6f8d;
+            margin-top: 12px;
+            text-align: center;
+            border-top: 1px solid #e9eef3;
+            padding-top: 8px;
+        }
+        button.small {
+            background: #f1f5f9;
+            border: none;
+            padding: 4px 12px;
+            border-radius: 20px;
+            font-size: 0.75rem;
+            cursor: pointer;
+        }
+        .flex-between {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        @media (max-width: 900px) {
+            .split-layout { flex-direction: column; }
+        }
+    </style>
+</head>
+<body>
+<div class="app-container">
+    <div class="header">
+        <div class="title-area">
+            <h1><i class="fas fa-chalkboard-user"></i> 班级诗歌朗读评价系统</h1>
+            <p>28位同学 · 独立量化档案 + 个人&班级双图表实时联动</p>
+        </div>
+        <div class="student-nav">
+            <div class="student-selector">
+                <label><i class="fas fa-user-graduate"></i> 学号</label>
+                <input type="number" id="studentIndex" min="1" max="28" value="1" step="1">
+                <span style="font-size:0.8rem;">/ 28</span>
+            </div>
+            <button class="nav-btn" id="prevStudent"><i class="fas fa-chevron-left"></i> 上一个</button>
+            <button class="nav-btn" id="nextStudent">下一个 <i class="fas fa-chevron-right"></i></button>
+            <div class="badge"><i class="fas fa-chart-line"></i> 动态个人图表</div>
+        </div>
+    </div>
+
+    <div class="split-layout">
+        <!-- 左侧：个人详细评分 + 雷达图+柱状图 (个人) -->
+        <div class="personal-panel">
+            <div class="flex-between">
+                <h3 style="margin:0 0 8px 0;"><i class="fas fa-user-pen"></i> 当前同学：<span id="currentStudentLabel">张雅宁 (1号)</span></h3>
+                <button id="resetCurrentBtn" class="small"><i class="fas fa-rotate-left"></i> 重置当前为中等示例</button>
+            </div>
+            <div style="overflow-x: auto;">
+                <table class="score-table" id="personalScoreTable">
+                    <tbody id="personalTableBody"></tbody>
+                </table>
+            </div>
+            <div class="total-card">
+                <span><i class="fas fa-medal"></i> 个人综合总分 (满分100)</span>
+                <span class="total-val" id="personalTotalSpan">0.0</span>
+            </div>
+            <div class="chart-title"><i class="fas fa-chart-pie"></i> 个人·五个维度雷达图 (平均分/5分制)</div>
+            <div id="personalRadar" class="radar-box"></div>
+            <div class="chart-title"><i class="fas fa-chart-simple"></i> 个人·维度实际得分 vs 满分 (权重得分)</div>
+            <div id="personalBar" class="bar-box"></div>
+            <div class="legend-note">
+                💡 修改表格中任意分数 → 个人雷达/柱状图 & 总分实时更新，同时右侧全班平均图自动刷新。
+            </div>
+        </div>
+
+        <!-- 右侧：全班28人综合评价概览 -->
+        <div class="class-panel">
+            <h3 style="margin:0 0 12px 0;"><i class="fas fa-users-viewfinder"></i> 班级整体评价 (28人) <i class="fas fa-chart-column"></i></h3>
+            <div class="chart-title">📊 全班各维度平均分 (雷达图 / 1-5分制)</div>
+            <div id="classRadar" class="radar-box" style="height: 280px;"></div>
+            <div class="chart-title">🏆 全班各维度加权得分均值对比 (实际得分 vs 满分线)</div>
+            <div id="classAvgBar" class="class-bar-box" style="height: 280px;"></div>
+            <div class="legend-note">
+                ⭐ 右侧图表基于28位同学实时数据汇总，左侧切换/修改数据都会同步更新班级整体统计。
+            </div>
+            <div style="background:#f8fafc; border-radius: 24px; margin-top: 16px; padding: 10px; text-align:center;">
+                <span><i class="fas fa-chart-simple"></i> 班级平均总分：<strong id="classAvgTotalSpan">--</strong> / 100</span>
+                &nbsp;&nbsp;| <i class="fas fa-chart-line"></i> 最高分：<strong id="classMaxTotalSpan">--</strong> &nbsp;最低分：<strong id="classMinTotalSpan">--</strong>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+    // ---------- 评价指标体系 (权重与指标完全一致) ----------
+    const dimensions = [
+        { name: "语音基础", weight: 25, indicators: ["发音准确", "吐字清晰", "语流自然"] },
+        { name: "节奏与韵律", weight: 20, indicators: ["停连得当", "重音恰当", "节奏感"] },
+        { name: "情感表达", weight: 30, indicators: ["情感贴合度", "感染力", "语调变化"] },
+        { name: "台风与仪态", weight: 15, indicators: ["姿态眼神", "面部表情"] },
+        { name: "综合效果", weight: 10, indicators: ["完整性", "整体印象"] }
+    ];
+    const INDICATOR_COUNT = dimensions.reduce((acc, d) => acc + d.indicators.length, 0); // 13个指标
+    
+    const CLASS_SIZE = 28;
+    let studentsData = [];   // 存储全班学生数据 (28 x 13)
+    
+    // ========= 分数模板 =========
+    function getExcellentTemplate() {
+        return [4.8, 4.6, 4.7, 4.5, 4.6, 4.8, 4.9, 4.8, 4.8, 4.6, 4.7, 4.9, 4.9];
+    }
+    function getMediumTemplate() {
+        return [3.2, 3.0, 3.1, 2.9, 3.0, 3.3, 3.2, 3.1, 2.9, 3.0, 3.2, 3.0, 3.1];
+    }
+    function getLowTemplate() {
+        return [2.3, 2.5, 2.4, 2.2, 2.6, 2.3, 2.1, 2.5, 2.0, 2.4, 2.2, 2.0, 2.1];
+    }
+    
+    // 初始化全班数据 (优秀8人，中等12人，潜力8人 + 个体微调)
+    function initClassData() {
+        let data = [];
+        for (let i = 1; i <= CLASS_SIZE; i++) {
+            let base;
+            if (i <= 8) base = [...getExcellentTemplate()];
+            else if (i <= 20) base = [...getMediumTemplate()];
+            else base = [...getLowTemplate()];
+            // 增加个体差异化微调 (-0.3 ~ +0.5)
+            for (let idx = 0; idx < INDICATOR_COUNT; idx++) {
+                let variation = (Math.random() - 0.3) * 0.7;
+                let newVal = base[idx] + variation;
+                newVal = Math.min(5.0, Math.max(1.0, newVal));
+                base[idx] = Number(newVal.toFixed(1));
+            }
+            data.push(base);
+        }
+        return data;
+    }
+    
+    let classDataStore = initClassData();
+    let currentStudentIdx = 0;   // 0-index
+    
+    // ---------- 核心计算函数: 根据个人指标数组计算维度实际分(加权) + 维度原始均分 ----------
+    function computePersonalStats(scoresArray) {
+        let dimResults = [];
+        let idx = 0;
+        for (let dim of dimensions) {
+            let cnt = dim.indicators.length;
+            let sum = 0;
+            for (let i = 0; i < cnt; i++) sum += scoresArray[idx + i];
+            let avgRaw = sum / cnt;                     // 1-5 原始平均分
+            let dimActual = (avgRaw / 5) * dim.weight;   // 基于权重的实际得分 (满分 dim.weight)
+            dimResults.push({
+                name: dim.name,
+                actualScore: dimActual,
+                avgRaw: avgRaw,
+                weight: dim.weight
+            });
+            idx += cnt;
+        }
+        return dimResults;
+    }
+    
+    function computeTotalScore(scoresArray) {
+        let dims = computePersonalStats(scoresArray);
+        return dims.reduce((acc, d) => acc + d.actualScore, 0);
+    }
+    
+    // 全班聚合统计: 各维度原始平均分(raw) + 各维度加权平均分(实际得分) + 总分统计
+    function computeClassAggregate() {
+        let dimCount = dimensions.length;
+        let dimRawSums = new Array(dimCount).fill(0);
+        let dimWeightedSums = new Array(dimCount).fill(0);
+        let totalScoresArr = [];
+        for (let s = 0; s < CLASS_SIZE; s++) {
+            let stats = computePersonalStats(classDataStore[s]);
+            let total = stats.reduce((acc, d) => acc + d.actualScore, 0);
+            totalScoresArr.push(total);
+            for (let d = 0; d < dimCount; d++) {
+                dimRawSums[d] += stats[d].avgRaw;
+                dimWeightedSums[d] += stats[d].actualScore;
+            }
+        }
+        let dimRawAvg = dimRawSums.map(sum => sum / CLASS_SIZE);
+        let dimWeightedAvg = dimWeightedSums.map(sum => sum / CLASS_SIZE);
+        let classAvgTotal = totalScoresArr.reduce((a,b)=>a+b,0) / CLASS_SIZE;
+        let maxTotal = Math.max(...totalScoresArr);
+        let minTotal = Math.min(...totalScoresArr);
+        return { dimRawAvg, dimWeightedAvg, classAvgTotal, maxTotal, minTotal };
+    }
+    
+    // ======================= 个人UI渲染 (表格 + 图表) =======================
+    let personalRadarChart = null;
+    let personalBarChart = null;
+    
+    // 渲染个人表格 (保证所有输入框绑定事件)
+    function renderPersonalTable() {
+        const tbody = document.getElementById('personalTableBody');
+        if (!tbody) return;
+        const currentScores = classDataStore[currentStudentIdx];
+        tbody.innerHTML = '';
+        let scoreIdx = 0;
+        for (let di = 0; di < dimensions.length; di++) {
+            const dim = dimensions[di];
+            // 维度标题行
+            let dimRow = document.createElement('tr');
+            dimRow.classList.add('category-header');
+            dimRow.innerHTML = `<th colspan="3">📌 ${dim.name} (满分 ${dim.weight})</th>`;
+            tbody.appendChild(dimRow);
+            // 指标行
+            for (let ind = 0; ind < dim.indicators.length; ind++) {
+                const indicatorName = dim.indicators[ind];
+                const val = currentScores[scoreIdx];
+                const row = document.createElement('tr');
+                row.innerHTML = `
+                    <td class="indent">${indicatorName}</td>
+                    <td><input type="number" class="score-input" data-index="${scoreIdx}" step="0.1" min="1" max="5" value="${val.toFixed(1)}"></td>
+                    <td style="font-weight:500; text-align:center;">${val.toFixed(1)}</td>
+                `;
+                tbody.appendChild(row);
+                scoreIdx++;
+            }
+            // 显示该维度的实际得分摘要
+            const dimStats = computePersonalStats(currentScores)[di];
+            const infoRow = document.createElement('tr');
+            infoRow.style.background = "#fafcff";
+            infoRow.innerHTML = `<td colspan="3" style="font-size:0.7rem; padding:4px 12px; color:#475569;">📊 维度实得: ${dimStats.actualScore.toFixed(1)} / ${dim.weight}</td>`;
+            tbody.appendChild(infoRow);
+        }
+        // 重新绑定输入事件
+        const inputs = document.querySelectorAll('#personalTableBody .score-input');
+        inputs.forEach(input => {
+            input.addEventListener('change', function(e) {
+                let idx = parseInt(this.getAttribute('data-index'));
+                let newVal = parseFloat(this.value);
+                if (isNaN(newVal)) newVal = 1;
+                newVal = Math.min(5, Math.max(1, newVal));
+                classDataStore[currentStudentIdx][idx] = newVal;
+                // 刷新个人全部视觉 + 全班概览
+                refreshPersonalChartsAndTotal();
+                refreshClassOverviewAndCharts();
+            });
+        });
+    }
+    
+    // 刷新个人图表 (雷达图 + 柱状图"实际得分 vs 满分") 以及总分文本
+    function refreshPersonalChartsAndTotal() {
+        const scores = classDataStore[currentStudentIdx];
+        const total = computeTotalScore(scores);
+        document.getElementById('personalTotalSpan').innerText = total.toFixed(1);
+        const dimStats = computePersonalStats(scores);
+        const dimNames = dimensions.map(d => d.name);
+        const avgRaws = dimStats.map(d => d.avgRaw);          // 用于雷达图 (原始1-5)
+        const actualScores = dimStats.map(d => d.actualScore); // 加权实际分
+        const maxPossible = dimensions.map(d => d.weight);     // 满分线
+        
+        // 雷达图配置
+        if (personalRadarChart) {
+            personalRadarChart.setOption({
+                radar: {
+                    indicator: dimNames.map(name => ({ name: name, max: 5 })),
+                    shape: 'circle',
+                    center: ['50%', '50%'],
+                    radius: '65%'
+                },
+                series: [{
+                    type: 'radar',
+                    data: [{ value: avgRaws, name: '维度平均分 (满分5分)' }],
+                    areaStyle: { color: 'rgba(59,130,246,0.2)' },
+                    lineStyle: { color: '#3b82f6', width: 2 }
+                }]
+            });
+        }
+        // 个人柱状图 - 实际得分 vs 满分 (修复空白问题)
+        if (personalBarChart) {
+            personalBarChart.setOption({
+                tooltip: { trigger: 'axis', axisPointer: { type: 'shadow' } },
+                legend: { data: ['实际得分 (权重分)', '维度满分线'], left: 'left' },
+                xAxis: { type: 'category', data: dimNames, axisLabel: { rotate: 15, fontWeight: 500 } },
+                yAxis: { type: 'value', name: '得分 (分)', min: 0 },
+                series: [
+                    {
+                        name: '实际得分 (权重分)',
+                        type: 'bar',
+                        data: actualScores,
+                        itemStyle: { borderRadius: [6,6,0,0], color: '#3b82f6', label: { show: true, position: 'top', formatter: '{c}' } },
+                        barWidth: '35%'
+                    },
+                    {
+                        name: '维度满分线',
+                        type: 'line',
+                        data: maxPossible,
+                        lineStyle: { type: 'dashed', color: '#f97316', width: 2 },
+                        symbol: 'none',
+                        tooltip: { valueFormatter: (value) => `满分: ${value}分` }
+                    }
+                ]
+            });
+        }
+        // 更新学生标签
+        document.getElementById('currentStudentLabel').innerHTML = `学号 ${currentStudentIdx+1} 同学`;
+    }
+    
+    // 刷新右侧全班所有图表 (雷达 + 加权柱状图)
+    let classRadarChart = null;
+    let classAvgBarChart = null;
+    
+    function refreshClassOverviewAndCharts() {
+        const agg = computeClassAggregate();
+        document.getElementById('classAvgTotalSpan').innerText = agg.classAvgTotal.toFixed(1);
+        document.getElementById('classMaxTotalSpan').innerText = agg.maxTotal.toFixed(1);
+        document.getElementById('classMinTotalSpan').innerText = agg.minTotal.toFixed(1);
+        const dimNames = dimensions.map(d => d.name);
+        
+        // 全班雷达图 (原始平均分 1-5)
+        if (classRadarChart) {
+            classRadarChart.setOption({
+                radar: { indicator: dimNames.map(name => ({ name, max: 5 })), shape: 'circle' },
+                series: [{ type: 'radar', data: [{ value: agg.dimRawAvg, name: '班级维度均分 (1-5)' }], areaStyle: { color: 'rgba(99,102,241,0.2)' } }]
+            });
+        } else {
+            const radarDom = document.getElementById('classRadar');
+            classRadarChart = echarts.init(radarDom);
+            classRadarChart.setOption({
+                radar: { indicator: dimNames.map(name => ({ name, max: 5 })), shape: 'circle', center: ['50%','50%'], radius: '65%' },
+                series: [{ type: 'radar', data: [{ value: agg.dimRawAvg, name: '班级平均' }], areaStyle: { color: 'rgba(99,102,241,0.2)' } }]
+            });
+        }
+        
+        // 全班柱状图: 维度加权平均得分 vs 满分线
+        if (classAvgBarChart) {
+            classAvgBarChart.setOption({
+                tooltip: { trigger: 'axis' },
+                legend: { data: ['班级维度平均得分 (加权)', '满分参考线'], left: 'left' },
+                xAxis: { type: 'category', data: dimNames, axisLabel: { rotate: 15 } },
+                yAxis: { type: 'value', name: '得分' },
+                series: [
+                    { name: '班级维度平均得分 (加权)', type: 'bar', data: agg.dimWeightedAvg, itemStyle: { color: '#10b981', borderRadius: [6,6,0,0], label: { show: true, position: 'top' } } },
+                    { name: '满分参考线', type: 'line', data: dimensions.map(d => d.weight), lineStyle: { type: 'dashed', color: '#f59e0b', width: 2 }, symbol: 'none' }
+                ]
+            });
+        } else {
+            const barDom = document.getElementById('classAvgBar');
+            classAvgBarChart = echarts.init(barDom);
+            classAvgBarChart.setOption({
+                tooltip: { trigger: 'axis' },
+                legend: { data: ['班级维度平均得分 (加权)', '满分参考线'] },
+                xAxis: { type: 'category', data: dimNames },
+                yAxis: { type: 'value', name: '得分' },
+                series: [
+                    { name: '班级维度平均得分 (加权)', type: 'bar', data: agg.dimWeightedAvg, itemStyle: { color: '#10b981', borderRadius: [6,6,0,0] } },
+                    { name: '满分参考线', type: 'line', data: dimensions.map(d => d.weight), lineStyle: { type: 'dashed', color: '#f59e0b' }, symbol: 'none' }
+                ]
+            });
+        }
+    }
+    
+    // 切换学生
+    function switchStudent(newIdx) {
+        if (newIdx < 0) newIdx = 0;
+        if (newIdx >= CLASS_SIZE) newIdx = CLASS_SIZE - 1;
+        currentStudentIdx = newIdx;
+        document.getElementById('studentIndex').value = currentStudentIdx + 1;
+        // 刷新个人表格+个人图表
+        renderPersonalTable();          // 重新构建表格
+        refreshPersonalChartsAndTotal(); // 更新图表和总分
+    }
+    
+    // 重置当前学生为中等示例 (并且随机微调)
+    function resetCurrentToMedium() {
+        const mediumBase = [...getMediumTemplate()];
+        for (let i = 0; i < INDICATOR_COUNT; i++) {
+            let variation = (Math.random() - 0.5) * 0.6;
+            let newv = mediumBase[i] + variation;
+            newv = Math.min(5.0, Math.max(1.0, newv));
+            mediumBase[i] = Number(newv.toFixed(1));
+        }
+        classDataStore[currentStudentIdx] = mediumBase;
+        renderPersonalTable();
+        refreshPersonalChartsAndTotal();
+        refreshClassOverviewAndCharts();
+    }
+    
+    // 初始化个人ECharts实例 & 初始渲染
+    function initPersonalCharts() {
+        const radarDom = document.getElementById('personalRadar');
+        const barDom = document.getElementById('personalBar');
+        if (radarDom && barDom) {
+            personalRadarChart = echarts.init(radarDom);
+            personalBarChart = echarts.init(barDom);
+        }
+    }
+    
+    // 事件绑定
+    function bindEvents() {
+        document.getElementById('prevStudent').addEventListener('click', () => switchStudent(currentStudentIdx - 1));
+        document.getElementById('nextStudent').addEventListener('click', () => switchStudent(currentStudentIdx + 1));
+        const studentInput = document.getElementById('studentIndex');
+        studentInput.addEventListener('change', function(e) {
+            let val = parseInt(e.target.value);
+            if (isNaN(val)) val = 1;
+            val = Math.min(CLASS_SIZE, Math.max(1, val));
+            switchStudent(val - 1);
+        });
+        const resetBtn = document.getElementById('resetCurrentBtn');
+        if (resetBtn) resetBtn.addEventListener('click', resetCurrentToMedium);
+    }
+    
+    function fullInit() {
+        initPersonalCharts();
+        bindEvents();
+        renderPersonalTable();          // 首屏渲染表格
+        refreshPersonalChartsAndTotal(); // 个人图表与总分
+        refreshClassOverviewAndCharts(); // 班级总览
+        // 窗口自适应
+        window.addEventListener('resize', () => {
+            if (personalRadarChart) personalRadarChart.resize();
+            if (personalBarChart) personalBarChart.resize();
+            if (classRadarChart) classRadarChart.resize();
+            if (classAvgBarChart) classAvgBarChart.resize();
+        });
+    }
+    
+    fullInit();
+</script>
+</body>
+</html>
